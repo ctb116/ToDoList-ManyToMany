@@ -1,0 +1,23 @@
+
+@{
+  Layout = "_Layout";
+}
+<p>Item index</p>
+@foreach(var item in Model)
+{
+  <ul>
+    <li><a href = "/items/@item.id">@item.description</a></li>
+  </ul>
+}
+<form action="/items/sorted" method = "post">
+<div class="form-group">
+<select class="form-control" name="order" id="order">
+<option>ASC</option>
+<option>DESC</option>
+</select>
+</div>
+<button type="submit" class="btn btn-info">Filter</button>
+</form>
+<a href = "/items/new">Add New Items</a>
+
+<a href = "/items/sorted">Sort Items</a>
