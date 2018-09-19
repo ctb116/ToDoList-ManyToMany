@@ -3,11 +3,9 @@
   Layout = "_Layout";
 }
 <p>Item index</p>
-@foreach(var item in Model)
+@foreach (var item in Model)
 {
-  <ul>
-    <li><a href = "/items/@item.id">@item.description</a></li>
-  </ul>
+    <h4>@item.description | <a href="/items/@item.id/update">Edit</a></h4>
 }
 <form action="/items/sorted" method = "post">
 <div class="form-group">
