@@ -17,12 +17,13 @@ namespace ToDoList.Controllers
     [HttpGet("/items/new")]
     public ActionResult CreateForm()
     {
-        return View();
+        List<Category> allCategories = Category.GetAll();
+        return View(allCategories);
     }
     [HttpPost("/items")]
     public ActionResult Create()
     {
-      Item newItem = new Item(Request.Form["itemDescription"], Request.Form["itemDueDate"], int.Parse(Request.Form["itemCategoryId"]));
+      Item newItem = new Item(Request.Form["itemDescription"], Request.Form["itemDueDate"], int.Parse(Request.Form["category"]));
       newItem.Save();
       List<Item> allItems = Item.GetAll();
       return RedirectToAction("Index");
@@ -43,16 +44,24 @@ namespace ToDoList.Controllers
     [HttpGet("/items/{id}/update")]
     public ActionResult UpdateForm(int id)
     {
-        Item thisItem = Item.Find(id);
-        return View(thisItem);
+        // Dictionary<List<Category>, Item> newDictionary = new Dictionary<List<Category>, Item>() {};
+        // Item thisItem = Item.Find(id);
+        // List<Category> allCategories = Category.GetAll();
+        // newDictionary.Add(allCategories, thisItem);
+        Dictionary<string, object> newDictionary = new Dictionary<string, object>();
+        List<Category> allCategories = Category.GetAll();
+        Item foundItem = Item.Find(id);
+        newDictionary.Add("categories",allCategories);
+        newDictionary.Add("item",foundItem);
+        return View(newDictionary);
     }
 
     [HttpPost("/items/{id}/update")]
     public ActionResult Update(int id, string newDescription, string newCategoryId)
     {
         Item thisItem = Item.Find(id);
-        int newIntCategoryId = int.Parse(newCategoryId);
-        thisItem.Edit(newDescription, newIntCategoryId);
+
+        thisItem.Edit(Request.Form["newDescription"], int.Parse(Request.Form["category"]));
         return RedirectToAction("Index");
     }
 
@@ -62,5 +71,15 @@ namespace ToDoList.Controllers
         Item.DeleteAll();
         return View();
     }
+
+    [HttpGet("/items/{id}/delete")]
+    public ActionResult Delete(int id)
+    {
+        Item thisItem = Item.Find(id);
+        thisItem.Delete(id);
+        return RedirectToAction("Index");
+    }
+
+
   }
 }

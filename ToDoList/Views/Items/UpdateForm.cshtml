@@ -1,9 +1,19 @@
+@{
+  Layout = "_Layout";
+}
 <h1>To Do List</h1>
 <hr />
-<h2>Edit item: @Model.description</h2>
-<form action="/items/@Model.id/update" method="post">
+<h2>Edit item: @Model["item"].description</h2>
+<form action="/items/@Model["item"].id/update" method="post">
     <label for="newDescription">Name:</label>
-    <input type="text" name="newDescription" value="@Model.description">
+    <input type="text" name="newDescription" value="@Model["item"].description">
+    <select>
+      @foreach (var category in Model["categories"])
+      {
+        <option name="category" value=@category.GetId()>@category.GetName()</option>
+      }
+    </select>
     <button type="submit">Edit</button>
 </form>
+<button class=btn btn-info><a href=/items/@Model["item"].id/delete>Delete</a></button>
 <h4><a href="/items">Return home</a></h4>
