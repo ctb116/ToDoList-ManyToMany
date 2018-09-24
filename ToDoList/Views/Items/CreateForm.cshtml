@@ -6,12 +6,9 @@
   <input id='itemDescription' name='itemDescription' type='text'>
   <label for='itemDueDate'>Item due date</label>
   <input id='itemDueDate' name='itemDueDate' type='date'>
-  <select name="category">
-    @foreach (var category in Model)
-    {
-      <option  value=@category.GetId()>@category.GetName()</option>
-    }
-  </select>
 
   <button type='submit'>Add item</button>
 </form>
+
+<p><a href="/">Back home</a></p>
+<p><a href="/items">View all items</a></p>
