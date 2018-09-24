@@ -11,22 +11,97 @@ namespace ToDoList.Models
     public int id {get; set; }
     public string description {get; set; }
     public string dueDate {get; set; }
-    public int categoryId {get; set;}
 
-    public Item(string Description, string newDueDate, int newCategoryId, int Id = 0)
+    public Item(string Description, string newDueDate, int Id = 0)
     {
       id = Id;
       description = Description;
       dueDate = newDueDate;
-      categoryId = newCategoryId;
     }
 
-    public void Edit(string newDescription, int newCategoryId)
+    public void AddCategory(Category newCategory)
     {
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"UPDATE items SET description = @newDescription, category_id = @newCategoryId WHERE id = @searchId;";
+      cmd.CommandText = @"INSERT INTO categories_items (category_id, item_id) VALUES (@CategoryId, @ItemId);";
+
+      MySqlParameter category_id = new MySqlParameter();
+      category_id.ParameterName = "@CategoryId";
+      category_id.Value = newCategory.GetId();
+      cmd.Parameters.Add(category_id);
+
+      MySqlParameter item_id = new MySqlParameter();
+      item_id.ParameterName = "@ItemId";
+      item_id.Value = id;
+      cmd.Parameters.Add(item_id);
+
+      cmd.ExecuteNonQuery();
+      conn.Close();
+      if(conn !=null)
+      {
+        conn.Dispose();
+      }
+
+    }
+
+    public List<Category> GetCategories()
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"SELECT category_id FROM categories_items WHERE item_id = @itemId;";
+
+      MySqlParameter itemIdParameter = new MySqlParameter();
+      itemIdParameter.ParameterName = "@itemId";
+      itemIdParameter.Value = id;
+      cmd.Parameters.Add(itemIdParameter);
+
+      var rdr = cmd.ExecuteReader() as MySqlDataReader;
+
+      List<int> categoryIds = new List<int> {};
+      while(rdr.Read())
+      {
+        int categoryId = rdr.GetInt32(0);
+        categoryIds.Add(categoryId);
+      }
+      rdr.Dispose();
+
+      List<Category> categories = new List<Category> {};
+      foreach (int categoryId in categoryIds)
+      {
+        var categoryQuery = conn.CreateCommand() as MySqlCommand;
+        categoryQuery.CommandText = @"SELECT * FROM categories WHERE id = @CategoryId;";
+
+        MySqlParameter categoryIdParameter = new MySqlParameter();
+        categoryIdParameter.ParameterName = "@CategoryId";
+        categoryIdParameter.Value = categoryId;
+        categoryQuery.Parameters.Add(categoryIdParameter);
+
+        var categoryQueryRdr = categoryQuery.ExecuteReader() as MySqlDataReader;
+        while(categoryQueryRdr.Read())
+        {
+          int thisCategoryId = categoryQueryRdr.GetInt32(0);
+          string categoryName = categoryQueryRdr.GetString(1);
+          Category foundCategory = new Category(categoryName, thisCategoryId);
+          categories.Add(foundCategory);
+        }
+        categoryQueryRdr.Dispose();
+      }
+      conn.Close();
+      if (conn != null)
+      {
+        conn.Dispose();
+      }
+      return categories;
+    }
+
+    public void Edit(string newDescription)
+    {
+      MySqlConnection conn = DB.Connection();
+      conn.Open();
+      var cmd = conn.CreateCommand() as MySqlCommand;
+      cmd.CommandText = @"UPDATE items SET description = @newDescription WHERE id = @searchId;";
 
       MySqlParameter searchId = new MySqlParameter();
       searchId.ParameterName = "@searchId";
@@ -38,14 +113,8 @@ namespace ToDoList.Models
       itemDescription.Value = newDescription;
       cmd.Parameters.Add(itemDescription);
 
-      MySqlParameter itemCategoryId = new MySqlParameter();
-      itemCategoryId.ParameterName = "@newCategoryId";
-      itemCategoryId.Value = newCategoryId;
-      cmd.Parameters.Add(itemCategoryId);
-
       cmd.ExecuteNonQuery();
       description = newDescription;
-      categoryId = newCategoryId;
 
       conn.Close();
       if (conn != null)
@@ -88,8 +157,7 @@ namespace ToDoList.Models
         int itemId = rdr.GetInt32(0);
         string itemDescription = rdr.GetString(1);
         string itemDueDate = rdr.GetString(2);
-        int itemCategoryId = rdr.GetInt32(3);
-        Item newItem = new Item(itemDescription, itemDueDate, itemCategoryId, itemId);
+        Item newItem = new Item(itemDescription, itemDueDate, itemId);
         allItems.Add(newItem);
       }
       conn.Close();
@@ -106,7 +174,7 @@ namespace ToDoList.Models
       conn.Open();
 
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"INSERT INTO items (description, dueDate, category_id) VALUES (@itemDescription, @itemDueDate, @itemCategoryId);";
+      cmd.CommandText = @"INSERT INTO items (description, dueDate) VALUES (@itemDescription, @itemDueDate);";
 
       MySqlParameter Description = new MySqlParameter();
       Description.ParameterName = "@itemDescription";
@@ -117,11 +185,6 @@ namespace ToDoList.Models
       newDueDate.ParameterName = "@itemDueDate";
       newDueDate.Value = this.dueDate;
       cmd.Parameters.Add(newDueDate);
-
-      MySqlParameter newCategoryId = new MySqlParameter();
-      newCategoryId.ParameterName = "@itemCategoryId";
-      newCategoryId.Value = this.categoryId;
-      cmd.Parameters.Add(newCategoryId);
 
       cmd.ExecuteNonQuery();
       id = (int) cmd.LastInsertedId;
@@ -146,8 +209,7 @@ namespace ToDoList.Models
         int id = rdr.GetInt32(0);
         string description = rdr.GetString(1);
         string dueDate = rdr.GetString(2);
-        int categoryId = rdr.GetInt32(3);
-        Item newItem = new Item(description, dueDate, categoryId, id);
+        Item newItem = new Item(description, dueDate, id);
         allItems.Add(newItem);
       }
       conn.Close();
@@ -191,6 +253,7 @@ namespace ToDoList.Models
         return (descriptionEquality && idEquality);
       }
     }
+
     public override int GetHashCode()
     {
       return this.description.GetHashCode();
@@ -214,24 +277,19 @@ namespace ToDoList.Models
       int itemId = 0;
       string itemDescription = "";
       string itemDueDate = "";
-      int itemCategoryId = 0;
 
       while (rdr.Read())
       {
           itemId = rdr.GetInt32(0);
           itemDescription = rdr.GetString(1);
           itemDueDate = rdr.GetString(2);
-          itemCategoryId = rdr.GetInt32(3);
       }
-
-      Item foundItem= new Item(itemDescription, itemDueDate, itemCategoryId, itemId);  // This line is new!
-
+      Item foundItem= new Item(itemDescription, itemDueDate, itemId);  // This line is new!
        conn.Close();
        if (conn != null)
        {
            conn.Dispose();
        }
-
       return foundItem;  // This line is new!
     }
   }

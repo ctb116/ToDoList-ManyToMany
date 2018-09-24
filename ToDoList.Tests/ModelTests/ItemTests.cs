@@ -32,8 +32,8 @@ namespace ToDoList.Tests
     public void Equals_ReturnsTrueIfDescriptionsAreTheSame_Item()
     {
       // Arrange, Act
-      Item firstItem = new Item("Mow the lawn", "2/2/2012", 1);
-      Item secondItem = new Item("Mow the lawn", "2/2/2012", 1);
+      Item firstItem = new Item("Mow the lawn", "2/2/2012");
+      Item secondItem = new Item("Mow the lawn", "2/2/2012");
 
       // Assert
       Assert.AreEqual(firstItem, secondItem);
@@ -43,7 +43,7 @@ namespace ToDoList.Tests
     public void Save_SavesToDatabase_ItemList()
     {
       //Arrange
-      Item testItem = new Item("Mow the lawn", "2/2/2012", 1);
+      Item testItem = new Item("Mow the lawn", "2/2/2012");
 
       //Act
       testItem.Save();
@@ -58,7 +58,7 @@ namespace ToDoList.Tests
     public void Find_FindsItemInDatabase_Item()
     {
       //Arrange
-      Item testItem = new Item("Mow the lawn", "2/2/2012", 1);
+      Item testItem = new Item("Mow the lawn", "2/2/2012");
       testItem.Save();
 
       //Act
@@ -66,6 +66,26 @@ namespace ToDoList.Tests
 
       //Assert
       Assert.AreEqual(testItem, foundItem);
+    }
+
+    [TestMethod]
+    public void AddCategory_AddsCategoryToItem_CategoryList()
+    {
+      //Arrange
+      Item testItem = new Item("Mow the lawn", "2/2/2012");
+      testItem.Save();
+
+      Category testCategory = new Category("HomeStuff");
+      testCategory.Save();
+
+      //Act
+      testItem.AddCategory(testCategory);
+
+      List<Category> result = testItem.GetCategories();
+      List<Category> testList = new List<Category>{testCategory};
+
+      //Assert
+      CollectionAssert.AreEqual(testList, result);
     }
   }
 }

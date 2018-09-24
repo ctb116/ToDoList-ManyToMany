@@ -124,7 +124,7 @@ namespace ToDoList.Models
             MySqlConnection conn = DB.Connection();
             conn.Open();
             var cmd = conn.CreateCommand() as MySqlCommand;
-            cmd.CommandText = @"DELETE FROM categories;";
+            cmd.CommandText = @"TRUNCATE TABLE categories;";
             cmd.ExecuteNonQuery();
             conn.Close();
             if (conn != null)
@@ -153,8 +153,7 @@ namespace ToDoList.Models
             int itemId = rdr.GetInt32(0);
             string itemDescription = rdr.GetString(1);
             string itemDueDate = rdr.GetString(2);
-            int itemCategoryId = rdr.GetInt32(3);
-            Item newItem = new Item(itemDescription, itemDueDate, itemCategoryId, itemId);
+            Item newItem = new Item(itemDescription, itemDueDate, itemId);
             allCategoryItems.Add(newItem);
           }
           conn.Close();

@@ -88,22 +88,24 @@ namespace ToDoList.Tests
       Category.DeleteAll();
     }
 
-    [TestMethod]
-    public void GetItems_RetrievesAllItemsWithCategory_ItemList()
-    {
-      Category testCategory = new Category("Household chores");
-      testCategory.Save();
+    // Left out because test is looking for category id based on one to many relationship
 
-      Item firstItem = new Item("Mow the lawn", "02/22/2018",  testCategory.GetId());
-      firstItem.Save();
-      Item secondItem = new Item("Do the dishes", "02/22/2018", testCategory.GetId());
-      secondItem.Save();
-
-
-      List<Item> testItemList = new List<Item> {firstItem, secondItem};
-      List<Item> resultItemList = testCategory.GetItems();
-
-      CollectionAssert.AreEqual(testItemList, resultItemList);
-    }
+    // [TestMethod]
+    // public void GetItems_RetrievesAllItemsWithCategory_ItemList()
+    // {
+    //   Category testCategory = new Category("Household chores");
+    //   testCategory.Save();
+    //
+    //   Item firstItem = new Item("Mow the lawn", "02/22/2018",  testCategory.GetId());
+    //   firstItem.Save();
+    //   Item secondItem = new Item("Do the dishes", "02/22/2018", testCategory.GetId());
+    //   secondItem.Save();
+    //
+    //
+    //   List<Item> testItemList = new List<Item> {firstItem, secondItem};
+    //   List<Item> resultItemList = testCategory.GetItems();
+    //
+    //   CollectionAssert.AreEqual(testItemList, resultItemList);
+    // }
   }
 }
