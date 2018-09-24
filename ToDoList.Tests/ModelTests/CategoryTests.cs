@@ -82,14 +82,6 @@ namespace ToDoList.Tests
       Assert.AreEqual(testCategory, foundCategory);
     }
 
-    public void Dispose()
-    {
-      Item.DeleteAll();
-      Category.DeleteAll();
-    }
-
-    // Left out because test is looking for category id based on one to many relationship
-
     // [TestMethod]
     // public void GetItems_RetrievesAllItemsWithCategory_ItemList()
     // {
@@ -107,5 +99,56 @@ namespace ToDoList.Tests
     //
     //   CollectionAssert.AreEqual(testItemList, resultItemList);
     // }
+
+    [TestMethod]
+    public void Test_AddItem_AddsItemToCategory()
+    {
+      //Arrange
+      Category testCategory = new Category("Household chores");
+      testCategory.Save();
+
+      Item testItem = new Item("Mow the lawn", "2/2/2012");
+      testItem.Save();
+
+      Item testItem2 = new Item("Water the garden", "2/2/2012");
+      testItem2.Save();
+
+      //Act
+      testCategory.AddItem(testItem);
+      testCategory.AddItem(testItem2);
+
+      List<Item> result = testCategory.GetItems();
+      List<Item> testList = new List<Item>{testItem, testItem2};
+
+      //Assert
+      CollectionAssert.AreEqual(testList, result);
+    }
+    [TestMethod]
+    public void Delete_DeletesCategoryAssociationsFromDatabase_CategoryList()
+    {
+      //Arrange
+      Item testItem = new Item("Mow the lawn", "2/2/2012");
+      testItem.Save();
+
+      string testName = "Home stuff";
+      Category testCategory = new Category(testName);
+      testCategory.Save();
+
+      //Act
+      testCategory.AddItem(testItem);
+      testCategory.Delete();
+
+      List<Category> resultItemCategories = testItem.GetCategories();
+      List<Category> testItemCategories = new List<Category> {};
+
+      //Assert
+      CollectionAssert.AreEqual(testItemCategories, resultItemCategories);
+      Category.DeleteAll();
+    }
+    public void Dispose()
+    {
+      Item.DeleteAll();
+      Category.DeleteAll();
+    }
   }
 }

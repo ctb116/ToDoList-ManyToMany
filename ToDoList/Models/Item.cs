@@ -19,6 +19,11 @@ namespace ToDoList.Models
       dueDate = newDueDate;
     }
 
+    public int GetId()
+    {
+        return id;
+    }
+
     public void AddCategory(Category newCategory)
     {
       MySqlConnection conn = DB.Connection();
@@ -123,17 +128,17 @@ namespace ToDoList.Models
       }
     }
 
-    public void Delete(int id)
+    public void Delete()
     {
       MySqlConnection conn = DB.Connection();
       conn.Open();
       var cmd = conn.CreateCommand() as MySqlCommand;
-      cmd.CommandText = @"DELETE FROM items WHERE id = @thisId";
+      cmd.CommandText = @"DELETE FROM items WHERE id = @ItemId; DELETE FROM categories_items WHERE item_id = @ItemId;";
 
-      MySqlParameter searchId = new MySqlParameter();
-      searchId.ParameterName = "@thisId";
-      searchId.Value = id;
-      cmd.Parameters.Add(searchId);
+      MySqlParameter itemParameter = new MySqlParameter();
+      itemParameter.ParameterName = "@ItemId";
+      itemParameter.Value = this.id;
+      cmd.Parameters.Add(itemParameter);
 
       cmd.ExecuteNonQuery();
 

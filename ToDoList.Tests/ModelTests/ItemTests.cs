@@ -9,10 +9,6 @@ namespace ToDoList.Tests
   [TestClass]
   public class ItemTests : IDisposable
   {
-    public void Dispose()
-    {
-      Item.DeleteAll();
-    }
     public ItemTests()
     {
       DBConfiguration.ConnectionString = "server=localhost;user id=root;password=root;port=8889;database=todo_test;";
@@ -86,6 +82,30 @@ namespace ToDoList.Tests
 
       //Assert
       CollectionAssert.AreEqual(testList, result);
+    }
+    [TestMethod]
+    public void Delete_DeletesItemAssociationsFromDatabase_ItemList()
+    {
+      Category testCategory = new Category("Home stuff");
+      testCategory.Save();
+
+      string testDescription = ("Mow the lawn");
+      string testDueDate = ("2/2/2012");
+      Item testItem = new Item(testDescription, testDueDate);
+      testItem.Save();
+
+      testItem.AddCategory(testCategory);
+      testItem.Delete();
+
+      List<Item> resultCategoryItems = testCategory.GetItems();
+      List<Item> testCategoryItems = new List<Item>{};
+
+      CollectionAssert.AreEqual(testCategoryItems, resultCategoryItems);
+      Category.DeleteAll();
+    }
+    public void Dispose()
+    {
+      Item.DeleteAll();
     }
   }
 }
